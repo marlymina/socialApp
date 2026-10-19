@@ -1,4 +1,4 @@
-import { useAuth } from "../Context/AuthContext";
+import { useAuth } from "../Context/useAuth";
 import { usePosts } from "../Hooks/usePosts";
 import { useSaved } from "../Hooks/useSaved";
 import PostCard, { getPostId } from "../Components/PostCard";
@@ -6,7 +6,7 @@ import { useState } from "react";
 import type { Post } from "../Interfaces/Post";
 import DeleteConfirmation from "../Components/DeleteConfirmation";
 import { useParams } from "react-router-dom";
-import { Mail, Users, Bookmark, FileText, Camera } from "lucide-react";
+import { Mail, Bookmark, FileText, Camera } from "lucide-react";
 import toast from "react-hot-toast";
 import { Helmet } from "react-helmet-async";
 import { useQuery } from "@tanstack/react-query";
@@ -27,7 +27,10 @@ export default function Profile() {
   const profileQuery = useQuery({
     queryKey: ["profile", targetUserId],
     queryFn: async () => {
-      const paths = [`/users/${targetUserId}/profile`, `/users/${targetUserId}`];
+      const paths = [
+        `/users/${targetUserId}/profile`,
+        `/users/${targetUserId}`,
+      ];
       for (const path of paths) {
         try {
           const response = await api.get(path);
@@ -132,11 +135,11 @@ export default function Profile() {
   const savedCount = savedQuery.data
     ? savedQuery.data.length
     : savedIds.length ||
-    profileData?.savedPosts?.length ||
-    profileData?.saved?.length ||
-    user?.savedPosts?.length ||
-    user?.saved?.length ||
-    0;
+      profileData?.savedPosts?.length ||
+      profileData?.saved?.length ||
+      user?.savedPosts?.length ||
+      user?.saved?.length ||
+      0;
 
   const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -165,7 +168,7 @@ export default function Profile() {
       } else {
         toast.error(data.message || "Failed to upload photo");
       }
-    } catch (error) {
+    } catch {
       toast.error("An error occurred while uploading");
     } finally {
       setUploading(false);
@@ -238,9 +241,10 @@ export default function Profile() {
             <h3>About</h3>
             <p>
               <Mail size={17} />
-              {profileData?.email || (ownProfile ? user?.email : "") || "No email available"}
+              {profileData?.email ||
+                (ownProfile ? user?.email : "") ||
+                "No email available"}
             </p>
-
           </div>
           <div className="profile-counts">
             <div>
@@ -280,7 +284,9 @@ export default function Profile() {
             />
           ))
         ) : (
-          <div className="empty-state">{ownProfile ? "You have not posted yet." : "No posts yet."}</div>
+          <div className="empty-state">
+            {ownProfile ? "You have not posted yet." : "No posts yet."}
+          </div>
         )}
       </section>
       {deleting && (

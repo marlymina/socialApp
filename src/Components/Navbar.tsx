@@ -8,7 +8,7 @@ import {
   UserRound,
 } from "lucide-react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
-import { useAuth } from "../Context/AuthContext";
+import { useAuth } from "../Context/useAuth";
 import toast from "react-hot-toast";
 import { TbWorld } from "react-icons/tb";
 

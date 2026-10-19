@@ -6,10 +6,9 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { loginUser } from "../Services/auth.service";
 import { getErrorMessage } from "../Services/api";
-import { useAuth } from "../Context/AuthContext";
+import { useAuth } from "../Context/useAuth";
 import { Helmet } from "react-helmet-async";
-import { TbWorld } from 'react-icons/tb';
-
+import { TbWorld } from "react-icons/tb";
 
 const schema = z.object({
   email: z.string().min(1, "Email or username is required"),
@@ -56,7 +55,9 @@ export default function Login() {
         className="auth-card card"
         onSubmit={handleSubmit((data) => mutation.mutate(data))}
       >
-        <div className="auth-logo"><TbWorld className="text-2xl"/></div>
+        <div className="auth-logo">
+          <TbWorld className="text-2xl" />
+        </div>
         <h1>Welcome back</h1>
         <p className="auth-subtitle">
           Log in and continue your social journey.

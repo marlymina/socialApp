@@ -1,8 +1,8 @@
-import { useContext, useEffect } from "react";
+import { useEffect } from "react";
 import Footer from "../Components/Footer";
 import { Outlet, useLocation } from "react-router-dom";
 import Navbar from "../Components/Navbar";
-import { AuthContext } from "../Context/AuthContext";
+import { useAuth } from "../Context/useAuth";
 
 const pageTitles: Record<string, string> = {
   "/feed": "Feed",
@@ -13,7 +13,7 @@ const pageTitles: Record<string, string> = {
 };
 
 export default function LayOut() {
-  const { userToken } = useContext(AuthContext);
+  const { token } = useAuth();
   const { pathname } = useLocation();
 
   useEffect(() => {
@@ -25,7 +25,7 @@ export default function LayOut() {
 
   return (
     <>
-      {userToken && <Navbar />}
+      {token && <Navbar />}
 
       <main className="mx-auto container">
         <Outlet></Outlet>

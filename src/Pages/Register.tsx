@@ -7,8 +7,7 @@ import toast from "react-hot-toast";
 import { registerUser } from "../Services/auth.service";
 import { getErrorMessage } from "../Services/api";
 import { Helmet } from "react-helmet-async";
-import { TbWorld } from 'react-icons/tb';
-
+import { TbWorld } from "react-icons/tb";
 
 const schema = z
   .object({
@@ -72,9 +71,17 @@ export default function Register() {
       </Helmet>
       <form
         className="auth-card card"
-        onSubmit={handleSubmit((data) => mutation.mutate(data))}
+        onSubmit={handleSubmit((data) => {
+          const payload = {
+            ...data,
+            userName: data.username,
+          };
+          mutation.mutate(payload);
+        })}
       >
-        <div className="auth-logo"><TbWorld className="text-2xl"/></div>
+        <div className="auth-logo">
+          <TbWorld className="text-2xl" />
+        </div>
         <h1>Create your account</h1>
         <p className="auth-subtitle">
           Join your friends and share your moments.

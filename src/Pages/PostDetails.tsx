@@ -2,14 +2,13 @@ import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { Pencil, Trash2 } from "lucide-react";
-import toast from "react-hot-toast";
 import api from "../Services/api";
 import type { Post } from "../Interfaces/Post";
 import type { Comment } from "../Interfaces/Comment";
 import { useComments } from "../Hooks/useComments";
 import CommentForm from "../Components/CommentForm";
 import DeleteConfirmation from "../Components/DeleteConfirmation";
-import { useAuth } from "../Context/AuthContext";
+import { useAuth } from "../Context/useAuth";
 import { Helmet } from "react-helmet-async";
 
 export default function PostDetails() {

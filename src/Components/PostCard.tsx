@@ -13,7 +13,7 @@ import {
 import { Link } from "react-router-dom";
 import type { Post } from "../Interfaces/Post";
 import type { User } from "../Interfaces/User";
-import { useAuth } from "../Context/AuthContext";
+import { useAuth } from "../Context/useAuth";
 import { usePosts } from "../Hooks/usePosts";
 
 interface Props {

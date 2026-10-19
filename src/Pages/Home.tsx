@@ -14,14 +14,24 @@ import PostForm from "../Components/PostForm";
 import PostCard from "../Components/PostCard";
 import DeleteConfirmation from "../Components/DeleteConfirmation";
 import type { Post } from "../Interfaces/Post";
+import type { User } from "../Interfaces/User";
 import { getPostId, getPostOwner } from "../Components/PostCard";
 import { usePosts } from "../Hooks/usePosts";
 import { useSaved } from "../Hooks/useSaved";
-import { useAuth } from "../Context/AuthContext";
+import { useAuth } from "../Context/useAuth";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import api from "../Services/api";
+import api, { getErrorMessage } from "../Services/api";
 import { Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
+
+type Friend = User & { isFollowing?: boolean };
+
+function extractUsers(payload: unknown): Friend[] {
+  const data = (payload as { data?: unknown } | undefined)?.data;
+  if (Array.isArray(data)) return data as Friend[];
+  const nested = data as { suggestions?: Friend[]; users?: Friend[] } | undefined;
+  return nested?.suggestions || nested?.users || [];
+}
 
 export default function Home() {
   const { user } = useAuth();
@@ -43,12 +53,9 @@ export default function Home() {
 
   const suggestionsQuery = useQuery({
     queryKey: ["suggestions"],
-    queryFn: async () => {
+    queryFn: async (): Promise<Friend[]> => {
       const response = await api.get("/users/suggestions?page=1&limit=5");
-      const data = response.data?.data;
-      return Array.isArray(data)
-        ? data
-        : data?.suggestions || data?.users || [];
+      return extractUsers(response.data);
     },
   });
 
@@ -70,10 +77,8 @@ export default function Home() {
       queryClient.invalidateQueries({ queryKey: ["user"] });
       toast.success("Updated follow status");
     },
-    onError: (error: any) => {
-      toast.error(
-        error.response?.data?.message || "Failed to update follow status",
-      );
+    onError: (error: unknown) => {
+      toast.error(getErrorMessage(error));
     },
   });
 
@@ -82,7 +87,7 @@ export default function Home() {
 
   const searchPoolQuery = useQuery({
     queryKey: ["suggestions", "pool"],
-    queryFn: async () => {
+    queryFn: async (): Promise<Friend[]> => {
       const pages = await Promise.allSettled(
         [1, 2, 3].map((page) =>
           api.get(`/users/suggestions?page=${page}&limit=30`),
@@ -90,10 +95,7 @@ export default function Home() {
       );
       return pages.flatMap((result) => {
         if (result.status !== "fulfilled") return [];
-        const data = result.value.data?.data;
-        return Array.isArray(data)
-          ? data
-          : data?.suggestions || data?.users || [];
+        return extractUsers(result.value.data);
       });
     },
     enabled: searching,
@@ -101,14 +103,9 @@ export default function Home() {
 
   const postAuthors = posts
     .map((post) => getPostOwner(post))
-    .filter(
-      (owner) =>
-        typeof owner === "object" &&
-        owner !== null &&
-        Boolean((owner as any)._id || (owner as any).id),
-    );
+    .filter((owner) => Boolean(owner._id || owner.id));
 
-  const friendPool: any[] = searching
+  const friendPool: Friend[] = searching
     ? [
         ...(searchPoolQuery.data || []),
         ...(suggestionsQuery.data || []),
@@ -117,8 +114,8 @@ export default function Home() {
     : suggestionsQuery.data || [];
 
   const seenFriends = new Set<string>();
-  const shownFriends = friendPool.filter((friend: any) => {
-    const id = String(friend?._id || friend?.id || "");
+  const shownFriends = friendPool.filter((friend) => {
+    const id = String(friend._id || friend.id || "");
     if (!id || id === currentUserId || seenFriends.has(id)) return false;
     seenFriends.add(id);
     if (!searching) return true;
@@ -239,7 +236,7 @@ export default function Home() {
           (searching && searchPoolQuery.isLoading && !shownFriends.length) ? (
             <p className="muted">Loading friends...</p>
           ) : shownFriends.length ? (
-            shownFriends.map((friend: any) => {
+            shownFriends.map((friend) => {
               const friendId = String(friend._id || friend.id || "");
               return (
                 <div className="friend-card" key={friendId}>

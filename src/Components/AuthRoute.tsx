@@ -1,13 +1,12 @@
-import { ReactNode, useContext } from "react";
+import type { ReactNode } from "react";
 import { Navigate } from "react-router-dom";
-import { AuthContext } from "../Context/AuthContext";
+import { useAuth } from "../Context/useAuth";
 
 export default function AuthRoute({ children }: { children: ReactNode }) {
-  const { userToken } = useContext(AuthContext);
+  const { token, loading } = useAuth();
 
-  if (userToken) {
-    return <Navigate to="/feed" replace />;
-  }
+  if (loading) return <div className="page-loading">Loading...</div>;
+  if (token) return <Navigate to="/" replace />;
 
   return <>{children}</>;
 }

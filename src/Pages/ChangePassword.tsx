@@ -34,8 +34,16 @@ export default function ChangePassword() {
   });
 
   const mutation = useMutation({
-    mutationFn: (payload: { password: string; newPassword: string }) =>
-      changePassword(payload),
+    mutationFn: (payload: {
+      password: string;
+      newPassword: string;
+      rePassword?: string;
+    }) =>
+      changePassword({
+        password: payload.password,
+        newPassword: payload.newPassword,
+        rePassword: payload.rePassword || payload.newPassword,
+      }),
     onSuccess: (response) => {
       const token = response?.data?.token || response?.token;
       if (token) localStorage.setItem("token", token);
@@ -46,7 +54,6 @@ export default function ChangePassword() {
   });
 
   const onSubmit = (data: FormData) => {
-    // استبعاد rePassword وإرسال password و newPassword فقط
     const { password, newPassword } = data;
     mutation.mutate({ password, newPassword });
   };

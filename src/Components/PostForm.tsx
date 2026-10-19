@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import { ImagePlus, Smile, X, Send } from "lucide-react";
 import EmojiPicker, { type EmojiClickData } from "emoji-picker-react";
-import { useAuth } from "../Context/AuthContext";
+import { useAuth } from "../Context/useAuth";
 
 interface Props {
   onSubmit: (body: string, image: File | null) => void;
